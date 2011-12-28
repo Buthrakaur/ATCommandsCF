@@ -28,6 +28,11 @@ namespace ATTestCF.Tests
 			             	"AT+CMGW=42,2\r07915892000000F001000B915892214365F7000021493A283D0795C3F33C88FE06CDCB6E32885EC6D341EDF27C1E3E97E72E" +
 			             	ATCommunicator.CtrlZ
 			             	+ "\r\r\n+CMGW: 5\r\n"));
+
+			Assert.Equal("+CMGW: 19",
+			             ATCommunicator.ParseResponse("0011000C912410325476980000AA05F4F29C1E03" +
+			                                          ATCommunicator.CtrlZ +
+			                                          "\r\n+CMGW: 19\r\n\r\nOK\r\n"));
 		}
 	}
 }

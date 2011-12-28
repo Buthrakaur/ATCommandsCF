@@ -66,14 +66,16 @@ namespace ATTestCF.Sms
 
 			response = ParseResponse(GetATCommandResponse(pduData + CtrlZ));
 			//response is "+CMGW: 5"
-			var m = Regex.Match(response, @"^\+CMGW: (\d+)$");
-			if (!m.Success || !m.Groups[0].Success || string.IsNullOrEmpty(m.Groups[0].Value))
+			var m = Regex.Match(response, @"^\+CMGW: (?<idx>\d+)$");
+			if (!m.Success || 
+				!m.Groups["idx"].Success || 
+				string.IsNullOrEmpty(m.Groups["idx"].Value))
 			{
 				throw new IOException("Didn't get success response from device.");
 			}
 			try
 			{
-				return int.Parse(m.Groups[0].Value);
+				return int.Parse(m.Groups["idx"].Value);
 			}
 			catch
 			{
@@ -201,11 +203,13 @@ namespace ATTestCF.Sms
 		}
 
 		private static readonly Regex rxResponseWithEcho = new Regex(@"^(?<input>.+)[\r\n]*(?<response>.+)[\r\n]*$");
+		private static readonly Regex rxResponseWithEchoAndStatus = new Regex(@"^(?<input>.+)[\r\n]*(?<response>.+)[\r\n]*(?<status>.+)[\r\n]*$");
 		private static readonly Regex rxResponseSimple = new Regex(@"^[\r\n]*(?<response>.+)[\r\n]*$");
 		public static string ParseResponse(string res)
 		{
 			var m = rxResponseSimple.Match(res);
 			if (!m.Success) m = rxResponseWithEcho.Match(res);
+			if (!m.Success) m = rxResponseWithEchoAndStatus.Match(res);
 			if (!m.Success) return null;
 
 			var g = m.Groups["response"];

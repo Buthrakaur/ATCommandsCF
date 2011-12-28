@@ -51,9 +51,19 @@ namespace ATTestCF.Sms
 		public void SaveTextMessage(Sms sms, ATCommunicator.CmgwStoreLocation location)
 		{
 			comm.At();
-			comm.Cpms(ATCommunicator.CpmsStorageArea.ME, ATCommunicator.CpmsStorageArea.ME, ATCommunicator.CpmsStorageArea.ME);
+			ATCommunicator.CpmsStorageArea[] s1, s2, s3;
+			comm.CpmsQuery(out s1, out s2, out s3);
+			comm.Cpms(FindPreferredLocation(s1), FindPreferredLocation(s2), FindPreferredLocation(s3));
 			comm.Cmgf(0);
 			comm.Cmgw(PduEncoder.Encode(sms), location);
+		}
+
+		private ATCommunicator.CpmsStorageArea FindPreferredLocation(IEnumerable<ATCommunicator.CpmsStorageArea> s)
+		{
+			Func<ATCommunicator.CpmsStorageArea, bool> isMatch = x => EnumerableHelper.Contains(s, x);
+			if (isMatch(ATCommunicator.CpmsStorageArea.ME)) return ATCommunicator.CpmsStorageArea.ME;
+			if (isMatch(ATCommunicator.CpmsStorageArea.MT)) return ATCommunicator.CpmsStorageArea.MT;
+			return ATCommunicator.CpmsStorageArea.SM;
 		}
 	}
 }

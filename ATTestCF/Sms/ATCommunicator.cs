@@ -61,7 +61,7 @@ namespace ATTestCF.Sms
 			//response should be ">"
 			if (response != ">")
 			{
-				throw new IOException("Didn't get success response from device.1");
+				throw new IOException("Didn't get success response from device.");
 			}
 
 			response = ParseResponse(GetATCommandResponse(pduData + CtrlZ));
@@ -69,7 +69,7 @@ namespace ATTestCF.Sms
 			var m = Regex.Match(response, @"^\+CMGW: (\d+)$");
 			if (!m.Success || !m.Groups[0].Success || string.IsNullOrEmpty(m.Groups[0].Value))
 			{
-				throw new IOException("Didn't get success response from device.2");
+				throw new IOException("Didn't get success response from device.");
 			}
 			try
 			{
@@ -77,7 +77,7 @@ namespace ATTestCF.Sms
 			}
 			catch
 			{
-				throw new IOException("Didn't get success response from device.3");
+				throw new IOException("Didn't get success response from device.");
 			}
 		}
 
@@ -86,13 +86,13 @@ namespace ATTestCF.Sms
 			//+CPMS: ("ME","SM"),("ME","SM"),("MT")
 			var response = GetATCommandResponse("AT+CPMS=?\r");
 			var m = Regex.Match(response,
-			            @"\+CPMS: \((?<1>('[A-Z]+',?)+)\),\((?<2>('[A-Z]+',?)+)\),\((?<3>('[A-Z]+'?)+)\)".Replace("'", "\""));
+			            @"\+CPMS: \((?<1>('[A-Z]+',?)+)\),\((?<2>('[A-Z]+',?)+)\),\((?<3>('[A-Z]+',?)+)\)".Replace("'", "\""));
 			if (!m.Success ||
 				!m.Groups["1"].Success ||
 				!m.Groups["2"].Success ||
 				!m.Groups["3"].Success)
 			{
-				throw new IOException("Didn't get success response from device.7");
+				throw new IOException("Didn't get success response from device.");
 			}
 
 			readAndDelete = EnumerableHelper.ToArray(ParseCpmsGroup(m.Groups["1"].Value));
@@ -177,20 +177,20 @@ namespace ATTestCF.Sms
 			//response should be ">"
 			if (response != ">")
 			{
-				throw new IOException("Didn't get success response from device.4");
+				throw new IOException("Didn't get success response from device.");
 			}
 			response = ParseResponse(GetATCommandResponse(pduData + CtrlZ));
 			//response should be echo or?
 			if (response.IndexOf("ERROR", StringComparison.InvariantCultureIgnoreCase) != -1)
 			{
-				throw new IOException("Didn't get success response from device.5");
+				throw new IOException("Didn't get success response from device.");
 			}
 		}
 
 		private static void EnsureSuccessResponse(string res)
 		{
 			if (IsSuccessResponse(res)) return;
-			throw new IOException("Didn't get success response from device.6");
+			throw new IOException("Didn't get success response from device.");
 		}
 
 		public static bool IsSuccessResponse(string res)

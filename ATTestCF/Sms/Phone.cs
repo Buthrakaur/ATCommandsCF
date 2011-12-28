@@ -45,7 +45,7 @@ namespace ATTestCF.Sms
 		{
 			comm.At();
 			comm.Cmgf(0);
-			comm.Cmgs(PduEncoder.Encode(sms));
+			EnumerableHelper.ForEach(PduEncoder.Encode(sms), pdu => comm.Cmgs(pdu));
 		}
 
 		public void SaveTextMessage(Sms sms, ATCommunicator.CmgwStoreLocation location)
@@ -55,7 +55,7 @@ namespace ATTestCF.Sms
 			comm.CpmsQuery(out s1, out s2, out s3);
 			comm.Cpms(FindPreferredLocation(s1), FindPreferredLocation(s2), FindPreferredLocation(s3));
 			comm.Cmgf(0);
-			comm.Cmgw(PduEncoder.Encode(sms), location);
+			EnumerableHelper.ForEach(PduEncoder.Encode(sms), pdu => comm.Cmgw(pdu, location));
 		}
 
 		private ATCommunicator.CpmsStorageArea FindPreferredLocation(IEnumerable<ATCommunicator.CpmsStorageArea> s)

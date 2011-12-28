@@ -119,5 +119,19 @@ namespace ATTestCF
 			foreach (var x in a) yield return x;
 			foreach (var x in b) yield return x;
 		}
+
+		public static T Single<T>(IEnumerable<T> a)
+		{
+			var res = default(T);
+			var idx = 0;
+			foreach (var i in a)
+			{
+				if (idx > 0) throw new ArgumentException("There's more than single one element in collection.", "a");
+				res = i;
+				idx++;
+			}
+			if (idx == 0) throw new ArgumentException("Collection is empty.", "a");
+			return res;
+		}
 	}
 }

@@ -1,21 +1,30 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace ATTestCF.Sms
 {
 	public static class PduEncoder
 	{
-		public static string Encode(Sms sms)
+		public static IEnumerable<string> Encode(Sms sms)
+		{
+			if (sms.Message.Length <= 160)
+			{
+				yield return EncodeShortMessage(sms);
+			}
+		}
+
+		private static string EncodeShortMessage(Sms sms)
 		{
 			var sb = new StringBuilder();
-			sb.Append("00");//no SCMS info
-			sb.Append("11");
-			sb.Append("00");
+			sb.Append("00"); //no SCMS info
+			sb.Append("11"); //PDU type | 0x40 for multipart => So for an SMS-SUBMIT with UDH present we set the PDU type to 0×41.
+			sb.Append("00"); //message reference - incremented in multipart messages
 			sb.Append(EncodePhoneNumber(sms.Recipient));
 			sb.Append("00"); //Protocol identifier (Short Message Type 0))
 			sb.Append("00"); //7bit encoding
 			sb.Append("AA"); //validity period
-			sb.Append(ToHexStr((byte) sms.Message.Length));//message length
+			sb.Append(ToHexStr((byte) sms.Message.Length)); //message length
 			//7bit message
 			EnumerableHelper.ForEach(GetMessageBytes(sms.Message), b => sb.Append(ToHexStr(b)));
 

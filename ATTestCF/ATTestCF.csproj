@@ -75,6 +75,8 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SMSPDULib\SMS.cs" />
+    <Compile Include="SMSPDULib\SMSBase.cs" />
     <Compile Include="Sms\ATCommunicator.cs" />
     <Compile Include="GenericEventArgs.cs" />
     <Compile Include="Sms\PduEncoder.cs" />

@@ -222,9 +222,9 @@ namespace ATTestCF.Sms
 		{
 			if (sentData != null) sentData(GetPrintableString(command));
 			port.Write(command);
+			Thread.Sleep(1000);
 			var res = ReadResponse();
 			if (receivedData != null) receivedData(GetPrintableString(res));
-			Thread.Sleep(1000);
 			return res;
 		}
 
@@ -239,7 +239,7 @@ namespace ATTestCF.Sms
 		private string ReadResponse()
 		{
 			var attempts = 0;
-			while (port.BytesToRead == 0 && attempts < 5 * 10)
+			while (port.BytesToRead == 0 && attempts < 5 * 60)
 			{
 				Thread.Sleep(200);
 				attempts++;

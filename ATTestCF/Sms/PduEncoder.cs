@@ -10,24 +10,77 @@ namespace ATTestCF.Sms
 		{
 			if (sms.Message.Length <= 160)
 			{
-				yield return EncodeShortMessage(sms);
+				yield return EncodeShortMessage(sms.Recipient, sms.Message);
+			}
+			else
+			{
+				var offset = 0;
+				byte idx = 0;
+				var parts = (byte)Math.Ceiling(sms.Message.Length/154f);
+				while (offset < sms.Message.Length)
+				{
+					var messagePart = sms.Message.Substring(offset, Math.Min(154, sms.Message.Length-offset));
+					yield return EncodeMultipartMessage(sms.Recipient, messagePart, idx, parts);
+					offset += 154;
+					idx++;
+				}
 			}
 		}
 
-		private static string EncodeShortMessage(Sms sms)
+		private static string EncodeMultipartMessage(string recipient, string messagePart, byte idx, byte parts)
+		{
+			var sb = new StringBuilder();
+			sb.Append("00"); //no SCMS info
+			sb.Append("41"); //PDU type | 0x40 for multipart => So for an SMS-SUBMIT with UDH present we set the PDU type to 0×41.
+			sb.Append(ToHexStr(idx)); //message reference - incremented in multipart messages
+			sb.Append(EncodePhoneNumber(recipient));
+			sb.Append("00"); //Protocol identifier (Short Message Type 0))
+			sb.Append("00"); //7bit encoding
+			sb.Append(ToHexStr((byte)(messagePart.Length + 6)));//Total payload length in septets (including UDH which is 6)
+			sb.Append("05"); //User data header length - always 5
+			//UDH:
+			//IEI = 0×00 - Information element identifier for a concatenated short message
+			sb.Append("00");
+			//IEDL = 0×03 - Information element data length
+			sb.Append("03");
+			//Ref nr = 0×00 - A reference number (must be the same for all parts of the same larger messages)
+			sb.Append("00");
+			//Total  = 0×03 - count of parts of this message
+			sb.Append(ToHexStr(parts));
+			//This part = 0×01 - this part index
+			sb.Append(ToHexStr((byte)(idx+1)));
+			//7bit message
+			GetMessageBytesAsHexString(messagePart, sb, true);
+
+			return sb.ToString().ToUpper();
+		}
+
+		private static string EncodeShortMessage(string recipient, string message)
 		{
 			var sb = new StringBuilder();
 			sb.Append("00"); //no SCMS info
 			sb.Append("11"); //PDU type | 0x40 for multipart => So for an SMS-SUBMIT with UDH present we set the PDU type to 0×41.
 			sb.Append("00"); //message reference - incremented in multipart messages
-			sb.Append(EncodePhoneNumber(sms.Recipient));
+			sb.Append(EncodePhoneNumber(recipient));
 			sb.Append("00"); //Protocol identifier (Short Message Type 0))
 			sb.Append("00"); //7bit encoding
 			sb.Append("AA"); //validity period
-			sb.Append(ToHexStr((byte) sms.Message.Length)); //message length
+			sb.Append(ToHexStr((byte) message.Length)); //message length
 			//7bit message
-			EnumerableHelper.ForEach(GetMessageBytes(sms.Message), b => sb.Append(ToHexStr(b)));
+			GetMessageBytesAsHexString(message, sb, false);
 
+			return sb.ToString().ToUpper();
+		}
+
+		private static void GetMessageBytesAsHexString(string message, StringBuilder sb, bool withPadding)
+		{
+			EnumerableHelper.ForEach(GetMessageBytes(message, withPadding), b => sb.Append(ToHexStr(b)));
+		}
+
+		public static string GetMessageBytesAsHexString(string message, bool withPadding)
+		{
+			var sb = new StringBuilder();
+			GetMessageBytesAsHexString(message, sb, withPadding);
 			return sb.ToString().ToUpper();
 		}
 
@@ -35,8 +88,9 @@ namespace ATTestCF.Sms
 		/// 7bit encoding
 		/// </summary>
 		/// <param name="message"></param>
+		/// <param name="withPadding">used for long messages with UDH header</param>
 		/// <returns></returns>
-		private static byte[] GetMessageBytes(string message)
+		private static byte[] GetMessageBytes(string message, bool withPadding)
 		{
 			//Get bytes for this SMS string
 			byte[] smsBytes = Encoding.ASCII.GetBytes(message);
@@ -45,9 +99,9 @@ namespace ATTestCF.Sms
 			byte bitsRequired = 0;
 			byte invertMask = 0;
 			int encodedMessageIndex = 0;
-			int shiftCount = 0;
+			int shiftCount = withPadding ? -1 : 0;
 			//calculating new encoded message length
-			int arrayLength = (int)(message.Length - Math.Floor(((double)message.Length / 8)));
+			int arrayLength = (int)(message.Length - Math.Ceiling(((double)message.Length / 8f)) + 1);
 			byte[] encodedMessage = new byte[arrayLength];
 			int i = 0;
 			for (i = 0; i < smsBytes.Length; i++)
@@ -57,7 +111,10 @@ namespace ATTestCF.Sms
 				{
 					bitsRequired = (byte)(smsBytes[i + 1] & mask);
 					shiftedMask = (byte)(bitsRequired << 7 - shiftCount);
-					encodedMessage[encodedMessageIndex] = (byte)(smsBytes[i] >> shiftCount);
+					encodedMessage[encodedMessageIndex] =
+						(byte) (shiftCount < 0
+						        	? smsBytes[i] << (-1*shiftCount)
+						        	: smsBytes[i] >> shiftCount);
 					encodedMessage[encodedMessageIndex] = (byte)(encodedMessage[encodedMessageIndex] | shiftedMask);
 				}
 				else

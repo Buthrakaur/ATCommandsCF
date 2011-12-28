@@ -65,15 +65,6 @@ namespace ATTestCF
 			}
 		}
 
-		public static bool Contains<T>(IEnumerable<T> e, T matchValue)
-		{
-			foreach (var i in e)
-			{
-				if (ReferenceEquals(i, matchValue)) return true;
-			}
-			return false;
-		}
-
 		public static void ForEach<T>(IEnumerable<T> e, Action<T> action)
 		{
 			foreach (var i in e)

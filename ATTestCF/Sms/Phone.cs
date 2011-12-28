@@ -60,7 +60,14 @@ namespace ATTestCF.Sms
 
 		private ATCommunicator.CpmsStorageArea FindPreferredLocation(IEnumerable<ATCommunicator.CpmsStorageArea> s)
 		{
-			Func<ATCommunicator.CpmsStorageArea, bool> isMatch = x => EnumerableHelper.Contains(s, x);
+			Func<ATCommunicator.CpmsStorageArea, bool> isMatch = x =>
+			                                                     	{
+			                                                     		foreach (var store in s)
+			                                                     		{
+			                                                     			if (store == x) return true;
+			                                                     		}
+			                                                     		return false;
+			                                                     	};
 			if (isMatch(ATCommunicator.CpmsStorageArea.ME)) return ATCommunicator.CpmsStorageArea.ME;
 			if (isMatch(ATCommunicator.CpmsStorageArea.MT)) return ATCommunicator.CpmsStorageArea.MT;
 			return ATCommunicator.CpmsStorageArea.SM;

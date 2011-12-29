@@ -51,6 +51,10 @@ namespace ATTestCF.Sms
 		public void SaveTextMessage(Sms sms, ATCommunicator.CmgwStoreLocation location)
 		{
 			comm.At();
+			if (!comm.CmqwSupportQuery())
+			{
+				throw new NotSupportedException("Message writing is not supported.");
+			}
 			ATCommunicator.CpmsStorageArea[] s1, s2, s3;
 			comm.CpmsQuery(out s1, out s2, out s3);
 			comm.Cpms(FindPreferredLocation(s1), FindPreferredLocation(s2), FindPreferredLocation(s3));

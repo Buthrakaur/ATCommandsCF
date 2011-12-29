@@ -51,6 +51,15 @@ namespace ATTestCF.Sms
 		/// <summary>
 		/// 
 		/// </summary>
+		/// <returns>true if CMGW is supported</returns>
+		public bool CmqwSupportQuery()
+		{
+			return GetATCommandResponse("AT+CMGW=?\r").IndexOf("ERROR", StringComparison.InvariantCultureIgnoreCase) == -1;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
 		/// <param name="pduData"></param>
 		/// <param name="storeLocation"></param>
 		/// <returns>index of stored message</returns>

@@ -79,6 +79,7 @@ namespace ATTestCF.Sms
 
 		public IEnumerable<ATCommunicator.PhonebookEntry> ListPhonebook()
 		{
+			comm.At();
 			var simInfo = comm.QueryPhonebookStorageStatus(ATCommunicator.PhonebookStorage.SIM);
 			var memoryInfo = comm.QueryPhonebookStorageStatus(ATCommunicator.PhonebookStorage.Memory);
 			return

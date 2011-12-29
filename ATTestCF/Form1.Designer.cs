@@ -47,12 +47,12 @@
 			// txtResponse
 			// 
 			this.txtResponse.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.txtResponse.Location = new System.Drawing.Point(0, 0);
+			this.txtResponse.Location = new System.Drawing.Point(0, 161);
 			this.txtResponse.Multiline = true;
 			this.txtResponse.Name = "txtResponse";
 			this.txtResponse.ReadOnly = true;
 			this.txtResponse.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-			this.txtResponse.Size = new System.Drawing.Size(240, 268);
+			this.txtResponse.Size = new System.Drawing.Size(240, 107);
 			this.txtResponse.TabIndex = 10;
 			// 
 			// mainMenu1
@@ -150,8 +150,8 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.AutoScroll = true;
 			this.ClientSize = new System.Drawing.Size(240, 268);
-			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.txtResponse);
+			this.Controls.Add(this.panel1);
 			this.Menu = this.mainMenu1;
 			this.MinimizeBox = false;
 			this.Name = "Form1";

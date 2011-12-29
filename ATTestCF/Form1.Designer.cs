@@ -98,6 +98,7 @@
 			this.btnSave.Size = new System.Drawing.Size(72, 20);
 			this.btnSave.TabIndex = 18;
 			this.btnSave.Text = "Ulozit";
+			this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
 			// 
 			// btnSend
 			// 
@@ -106,6 +107,7 @@
 			this.btnSend.Size = new System.Drawing.Size(72, 20);
 			this.btnSend.TabIndex = 17;
 			this.btnSend.Text = "Odeslat";
+			this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
 			// 
 			// txtRecipient
 			// 

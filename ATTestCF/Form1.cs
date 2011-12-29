@@ -42,14 +42,15 @@ namespace ATTestCF
 		private void InvokePhone(Action<Phone> phoneAction)
 		{
 			Cursor.Current = Cursors.WaitCursor;
+			txtResponse.Text = new string('-', 10) + "\r\n" + txtResponse.Text;
 			try
 			{
 				using (var phone = new Phone("COM" + (int) numericUpDown1.Value))
 				{
 					phone.CommandSent +=
-						(snd, args) => txtResponse.Text = string.Format("Sent: {0}\r\n{1}", args.Arg, txtResponse.Text);
+						(snd, args) => AddResponseText(string.Format("Sent: {0}\r\n", args.Arg));
 					phone.ResponseReceived +=
-						(snd, args) => txtResponse.Text = string.Format("Received: {0}\r\n{1}", args.Arg, txtResponse.Text);
+						(snd, args) => AddResponseText(string.Format("Received: {0}\r\n", args.Arg));
 					phoneAction(phone);
 				}
 			}
@@ -64,10 +65,27 @@ namespace ATTestCF
 			}
 		}
 
+		private void AddResponseText(string txt)
+		{
+			txtResponse.Text = txt + txtResponse.Text;
+		}
+
 		private void HandleException(Exception exc)
 		{
-			txtResponse.Text = string.Format("!Err: {0}\r\n{1}\r\n{2}", exc.Message, exc.StackTrace, txtResponse.Text);
+			AddResponseText(string.Format("!Err: {0}\r\n{1}\r\n", exc.Message, exc.StackTrace));
 			MessageBox.Show(string.Format("{0}: {1}", exc.GetType().Name, exc.Message));
+		}
+
+		private void menuItem2_Click(object sender, EventArgs e)
+		{
+			InvokePhone(phone =>
+			            	{
+			            		var phonebook = EnumerableHelper.ToList(phone.ListPhonebook());
+								phonebook.Sort((a,b) => a.Name.CompareTo(b.Name));
+			            		var sb = new StringBuilder();
+								EnumerableHelper.ForEach(phonebook, p => sb.Append(string.Format("{0}: {1}\r\n", p.Name, p.PhoneNumber)));
+								AddResponseText("Phonebook entries:\r\n" + sb.ToString());
+			            	});
 		}
 	}
 }

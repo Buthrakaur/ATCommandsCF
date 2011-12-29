@@ -76,5 +76,14 @@ namespace ATTestCF.Sms
 			if (isMatch(ATCommunicator.CpmsStorageArea.MT)) return ATCommunicator.CpmsStorageArea.MT;
 			return ATCommunicator.CpmsStorageArea.SM;
 		}
+
+		public IEnumerable<ATCommunicator.PhonebookEntry> ListPhonebook()
+		{
+			var simInfo = comm.QueryPhonebookStorageStatus(ATCommunicator.PhonebookStorage.SIM);
+			var memoryInfo = comm.QueryPhonebookStorageStatus(ATCommunicator.PhonebookStorage.Memory);
+			return
+				EnumerableHelper.Concatenate(comm.QueryPhonebook(ATCommunicator.PhonebookStorage.SIM, 1, simInfo.UsedLocations),
+				                             comm.QueryPhonebook(ATCommunicator.PhonebookStorage.Memory, 1, memoryInfo.UsedLocations));
+		}
 	}
 }

@@ -234,7 +234,7 @@ namespace ATTestCF.Sms
 		{
 			//+CPBS: "ME",1,2000
 			var res = ParseResponse(GetATCommandResponse("AT+CPBS?\r"));
-			var m = Regex.Match(res, @"+CPBS: ""(?<store>[A-Z]+)"",(?<used>\d+),(?<total>\d+)");
+			var m = Regex.Match(res, @"\+CPBS: ""(?<store>[A-Z]+)"",(?<used>\d+),(?<total>\d+)");
 			if (!m.Success)
 			{
 				throw new IOException("Didn't get valid response from device.");

@@ -250,6 +250,42 @@ namespace ATTestCF.Sms
 			return CpbsQueryCurrentStoreStatus();
 		}
 
+		public class PhonebookEntry
+		{
+			public int Index { get; private set; }
+			public string PhoneNumber { get; private set; }
+			public int Type { get; private set; }
+			public string Name { get; private set; }
+
+			public PhonebookEntry(int index, string phoneNumber, int type, string name)
+			{
+				Index = index;
+				PhoneNumber = phoneNumber;
+				Type = type;
+				Name = name;
+			}
+
+			private static readonly Regex rxParse = new Regex(@"\+CPBR: (\d+),""(\+?\d+)"",(\d+),""(.+)""");
+			public static IEnumerable<PhonebookEntry> Parse(string input)
+			{
+				//+CPBR: 1,"123456789",129,"Jmeno Prijmeni",,,,,,,
+				//+CPBR: 2,"+420123456789",129,"Jmeno Prijmeni2",,,,,,,
+				foreach (Match m in rxParse.Matches(input))
+				{
+					yield return new PhonebookEntry(int.Parse(m.Groups[0].Value),
+					                                m.Groups[1].Value,
+					                                int.Parse(m.Groups[2].Value),
+					                                m.Groups[3].Value);
+				}
+			}
+		}
+
+		public IEnumerable<PhonebookEntry> QueryPhonebook(PhonebookStorage storage, int startIndex, int endIndex)
+		{
+			CpbsSet(storage);
+			return PhonebookEntry.Parse(GetATCommandResponse(string.Format("AT+CPBR={0},{1}\r", startIndex, endIndex)));
+		}
+
 		private static void EnsureSuccessResponse(string res)
 		{
 			if (IsSuccessResponse(res)) return;

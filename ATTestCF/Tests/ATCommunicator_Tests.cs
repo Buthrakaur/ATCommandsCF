@@ -33,6 +33,9 @@ namespace ATTestCF.Tests
 			             ATCommunicator.ParseResponse("0011000C912410325476980000AA05F4F29C1E03" +
 			                                          ATCommunicator.CtrlZ +
 			                                          "\r\n+CMGW: 19\r\n\r\nOK\r\n"));
+
+			Assert.Equal("+CPBS: \"ME\",1,2000",
+				ATCommunicator.ParseResponse("\r\n+CPBS: \"ME\",1,2000\r\n\r\nOK\r\n"));
 		}
 	}
 }

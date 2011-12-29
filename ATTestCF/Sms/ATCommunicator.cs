@@ -198,6 +198,58 @@ namespace ATTestCF.Sms
 			}
 		}
 
+		public enum PhonebookStorage
+		{
+			/// <summary>
+			/// "SM"
+			/// </summary>
+			SIM,
+			/// <summary>
+			/// "ME"
+			/// </summary>
+			Memory
+		}
+
+		private void CpbsSet(PhonebookStorage storage)
+		{
+			var storageCode = storage == PhonebookStorage.Memory ? "ME" : "SM";
+			EnsureSuccessResponse(GetATCommandResponse(string.Format("AT+CPBS=\"{0}\"\r", storageCode)));
+		}
+
+		public class PhonebookStorageQueryResult
+		{
+			public PhonebookStorage StorageType { get; private set; }
+			public int UsedLocations { get; private set; }
+			public int TotalLocations { get; private set; }
+
+			public PhonebookStorageQueryResult(PhonebookStorage storageType, int usedLocations, int totalLocations)
+			{
+				StorageType = storageType;
+				UsedLocations = usedLocations;
+				TotalLocations = totalLocations;
+			}
+		}
+
+		private PhonebookStorageQueryResult CpbsQueryCurrentStoreStatus()
+		{
+			//+CPBS: "ME",1,2000
+			var res = ParseResponse(GetATCommandResponse("AT+CPBS?\r"));
+			var m = Regex.Match(res, @"+CPBS: ""(?<store>[A-Z]+)"",(?<used>\d+),(?<total>\d+)");
+			if (!m.Success)
+			{
+				throw new IOException("Didn't get valid response from device.");
+			}
+			return new PhonebookStorageQueryResult(m.Groups[0].Value == "ME" ? PhonebookStorage.Memory : PhonebookStorage.SIM,
+			                                       int.Parse(m.Groups[1].Value),
+			                                       int.Parse(m.Groups[2].Value));
+		}
+
+		public PhonebookStorageQueryResult QueryPhonebookStorageStatus(PhonebookStorage storage)
+		{
+			CpbsSet(storage);
+			return CpbsQueryCurrentStoreStatus();
+		}
+
 		private static void EnsureSuccessResponse(string res)
 		{
 			if (IsSuccessResponse(res)) return;
